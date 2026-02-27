@@ -458,7 +458,6 @@ onBeforeUnmount(() => {
 				ref="workflowHeaderActions"
 				:tags="tags"
 				:name="name"
-				:meta="meta"
 				:is-archived="isArchived"
 				:is-new-workflow="isNewWorkflow"
 				:workflow-permissions="workflowPermissions"

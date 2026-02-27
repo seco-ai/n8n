@@ -335,7 +335,6 @@ describe('useWorkflowHelpers', () => {
 			workflowsStore.isWorkflowActive = false;
 			workflowsStore.workflow.settings = { executionOrder: 'v1' };
 			workflowsStore.workflow.versionId = 'v1';
-			workflowsStore.workflow.meta = {};
 			workflowsStore.pinnedWorkflowData = {};
 
 			const documentId = createWorkflowDocumentId(workflowId);
