@@ -57,7 +57,6 @@ const props = defineProps<{
 	tags: readonly string[];
 	name: IWorkflowDb['name'];
 	meta: IWorkflowDb['meta'];
-	scopes: IWorkflowDb['scopes'];
 	currentFolder?: FolderShortInfo;
 	isArchived: IWorkflowDb['isArchived'];
 	description?: IWorkflowDb['description'];
@@ -105,7 +104,9 @@ const isNewWorkflow = computed(() => {
 	return !workflowsStore.isWorkflowSaved[props.id];
 });
 
-const workflowPermissions = computed(() => getResourcePermissions(props.scopes).workflow);
+const workflowPermissions = computed(
+	() => getResourcePermissions(workflowDocumentStore?.value?.scopes).workflow,
+);
 
 const readOnly = computed(
 	() => sourceControlStore.preferences.branchReadOnly || collaborationStore.shouldBeReadOnly,

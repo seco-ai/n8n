@@ -286,7 +286,6 @@ async function onWorkflowDeactivated() {
 					:tags="workflowTags"
 					:name="workflow.name"
 					:meta="workflow.meta"
-					:scopes="workflow.scopes"
 					:current-folder="parentFolderForBreadcrumbs"
 					:is-archived="workflow.isArchived"
 					:description="workflow.description"

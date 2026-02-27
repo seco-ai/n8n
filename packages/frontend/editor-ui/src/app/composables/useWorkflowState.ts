@@ -27,7 +27,6 @@ import { inject } from 'vue';
 import * as workflowsApi from '@/app/api/workflows';
 import { useRootStore } from '@n8n/stores/useRootStore';
 import { isEmpty } from '@/app/utils/typesUtils';
-import { useProjectsStore } from '@/features/collaboration/projects/projects.store';
 import { clearPopupWindowState } from '@/features/execution/executions/executions.utils';
 import { useDocumentTitle } from './useDocumentTitle';
 import { useWorkflowStateStore } from '@/app/stores/workflowState.store';
@@ -169,10 +168,8 @@ export function useWorkflowState() {
 	}
 
 	function makeNewWorkflowShareable() {
-		const { currentProject, personalProject } = useProjectsStore();
-		const scopes = currentProject?.scopes ?? personalProject?.scopes ?? [];
-
-		ws.workflow.scopes = scopes;
+		// scopes and homeProject for new workflows are now set on the
+		// workflowDocumentStore in initializeWorkspaceForNewWorkflow
 	}
 
 	async function getNewWorkflowDataAndMakeShareable(
@@ -183,10 +180,6 @@ export function useWorkflowState() {
 		const workflowData = await getNewWorkflowData(name, projectId, parentFolderId);
 		makeNewWorkflowShareable();
 		return workflowData;
-	}
-
-	function setWorkflowScopes(scopes: IWorkflowDb['scopes']): void {
-		ws.workflow.scopes = scopes;
 	}
 
 	function setWorkflowMetadata(metadata: WorkflowMetadata | undefined): void {
@@ -453,7 +446,6 @@ export function useWorkflowState() {
 		setWorkflowProperty,
 		setActiveExecutionId,
 		getNewWorkflowDataAndMakeShareable,
-		setWorkflowScopes,
 		setWorkflowMetadata,
 		addToWorkflowMetadata,
 

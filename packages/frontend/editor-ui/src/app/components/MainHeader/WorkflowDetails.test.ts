@@ -171,7 +171,6 @@ const defaultProps = {
 	tags: ['1', '2'] as readonly string[],
 	name: workflow.name,
 	meta: workflow.meta,
-	scopes: workflow.scopes,
 	isArchived: workflow.isArchived,
 	description: workflow.description,
 };
@@ -182,6 +181,7 @@ describe('WorkflowDetails', () => {
 		setActivePinia(docPinia);
 		const workflowDocumentStore = useWorkflowDocumentStore(createWorkflowDocumentId(workflow.id));
 		workflowDocumentStore.setActiveState({ activeVersionId: null, activeVersion: null });
+		workflowDocumentStore.setScopes(workflow.scopes ?? []);
 		workflowDocumentStoreRef.value = workflowDocumentStore;
 		setActivePinia(pinia);
 
@@ -263,11 +263,11 @@ describe('WorkflowDetails', () => {
 		it('should not have workflow duplicate and import when branch is read-only', async () => {
 			sourceControlStore.preferences.branchReadOnly = true;
 
+			workflowDocumentStoreRef.value?.setScopes(['workflow:read']);
 			const { getByTestId, queryByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: false,
-					scopes: ['workflow:read'],
 				},
 			});
 
@@ -281,11 +281,11 @@ describe('WorkflowDetails', () => {
 		it('should not have workflow duplicate and import when collaboration is read-only', async () => {
 			collaborationStore.shouldBeReadOnly = true;
 
+			workflowDocumentStoreRef.value?.setScopes(['workflow:read']);
 			const { getByTestId, queryByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: false,
-					scopes: ['workflow:read'],
 				},
 			});
 
@@ -297,11 +297,11 @@ describe('WorkflowDetails', () => {
 		});
 
 		it('should have workflow duplicate and import options if permission update is true', async () => {
+			workflowDocumentStoreRef.value?.setScopes(['workflow:update']);
 			const { getByTestId, queryByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: false,
-					scopes: ['workflow:update'],
 				},
 			});
 
@@ -327,12 +327,12 @@ describe('WorkflowDetails', () => {
 					params: { name: 'test' },
 				} as unknown as ReturnType<typeof useRoute>);
 
+			workflowDocumentStoreRef.value?.setScopes(['workflow:delete']);
 			const { getByTestId, queryByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					id: 'new',
 					isArchived: false,
-					scopes: ['workflow:delete'],
 				},
 			});
 
@@ -344,11 +344,11 @@ describe('WorkflowDetails', () => {
 		});
 
 		it("should have 'Archive' option on non archived workflow", async () => {
+			workflowDocumentStoreRef.value?.setScopes(['workflow:delete']);
 			const { getByTestId, queryByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: false,
-					scopes: ['workflow:delete'],
 				},
 			});
 
@@ -362,11 +362,11 @@ describe('WorkflowDetails', () => {
 		it("should not have 'Archive' option on non archived workflow when branch is read-only", async () => {
 			sourceControlStore.preferences.branchReadOnly = true;
 
+			workflowDocumentStoreRef.value?.setScopes(['workflow:delete']);
 			const { getByTestId, queryByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: false,
-					scopes: ['workflow:delete'],
 				},
 			});
 
@@ -379,11 +379,11 @@ describe('WorkflowDetails', () => {
 		it("should not have 'Archive' option on non archived workflow when collaboration is read-only", async () => {
 			collaborationStore.shouldBeReadOnly = true;
 
+			workflowDocumentStoreRef.value?.setScopes(['workflow:delete']);
 			const { getByTestId, queryByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: false,
-					scopes: ['workflow:delete'],
 				},
 			});
 
@@ -394,11 +394,11 @@ describe('WorkflowDetails', () => {
 		});
 
 		it("should not have 'Archive' option on non archived workflow without permission", async () => {
+			workflowDocumentStoreRef.value?.setScopes(['workflow:update']);
 			const { getByTestId, queryByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: false,
-					scopes: ['workflow:update'],
 				},
 			});
 
@@ -409,11 +409,11 @@ describe('WorkflowDetails', () => {
 		});
 
 		it("should have 'Unarchive' and 'Delete' options on archived workflow", async () => {
+			workflowDocumentStoreRef.value?.setScopes(['workflow:delete']);
 			const { getByTestId, queryByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: true,
-					scopes: ['workflow:delete'],
 				},
 			});
 
@@ -428,11 +428,11 @@ describe('WorkflowDetails', () => {
 		it("should not have 'Unarchive' or 'Delete' options on archived workflow when branch is read-only", async () => {
 			sourceControlStore.preferences.branchReadOnly = true;
 
+			workflowDocumentStoreRef.value?.setScopes(['workflow:delete']);
 			const { getByTestId, queryByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: true,
-					scopes: ['workflow:delete'],
 				},
 			});
 
@@ -445,11 +445,11 @@ describe('WorkflowDetails', () => {
 		it("should not have 'Unarchive' or 'Delete' options on archived workflow when collaboration is read-only", async () => {
 			collaborationStore.shouldBeReadOnly = true;
 
+			workflowDocumentStoreRef.value?.setScopes(['workflow:delete']);
 			const { getByTestId, queryByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: true,
-					scopes: ['workflow:delete'],
 				},
 			});
 
@@ -460,11 +460,11 @@ describe('WorkflowDetails', () => {
 		});
 
 		it("should not have 'Unarchive' or 'Delete' options on archived workflow without permission", async () => {
+			workflowDocumentStoreRef.value?.setScopes(['workflow:update']);
 			const { getByTestId, queryByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: true,
-					scopes: ['workflow:update'],
 				},
 			});
 
@@ -475,11 +475,11 @@ describe('WorkflowDetails', () => {
 		});
 
 		it('should not have edit actions on archived workflow even with update permission', async () => {
+			workflowDocumentStoreRef.value?.setScopes(['workflow:update', 'workflow:delete']);
 			const { getByTestId, queryByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: true,
-					scopes: ['workflow:update', 'workflow:delete'],
 				},
 			});
 
@@ -490,11 +490,11 @@ describe('WorkflowDetails', () => {
 		});
 
 		it("should call onWorkflowMenuSelect on 'Archive' option click on nonactive workflow", async () => {
+			workflowDocumentStoreRef.value?.setScopes(['workflow:delete']);
 			const { getByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: false,
-					scopes: ['workflow:delete'],
 				},
 			});
 
@@ -528,11 +528,11 @@ describe('WorkflowDetails', () => {
 			workflowsListStore.getWorkflowById.mockReturnValue(teamWorkflow as IWorkflowDb);
 			workflowsStore.archiveWorkflow.mockResolvedValue(undefined);
 
+			workflowDocumentStoreRef.value?.setScopes(['workflow:delete']);
 			const { getByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: false,
-					scopes: ['workflow:delete'],
 				},
 			});
 
@@ -559,11 +559,11 @@ describe('WorkflowDetails', () => {
 			workflowsListStore.getWorkflowById.mockReturnValue(personalWorkflow as IWorkflowDb);
 			workflowsStore.archiveWorkflow.mockResolvedValue(undefined);
 
+			workflowDocumentStoreRef.value?.setScopes(['workflow:delete']);
 			const { getByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: false,
-					scopes: ['workflow:delete'],
 				},
 			});
 
@@ -584,11 +584,11 @@ describe('WorkflowDetails', () => {
 				activeVersionId: 'v1',
 				activeVersion: null,
 			});
+			workflowDocumentStoreRef.value?.setScopes(['workflow:delete']);
 			const { getByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: false,
-					scopes: ['workflow:delete'],
 				},
 			});
 
@@ -610,11 +610,11 @@ describe('WorkflowDetails', () => {
 		});
 
 		it("should call onWorkflowMenuSelect on 'Unarchive' option click", async () => {
+			workflowDocumentStoreRef.value?.setScopes(['workflow:delete']);
 			const { getByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: true,
-					scopes: ['workflow:delete'],
 				},
 			});
 
@@ -628,11 +628,11 @@ describe('WorkflowDetails', () => {
 		});
 
 		it("should call onWorkflowMenuSelect on 'Delete' option click", async () => {
+			workflowDocumentStoreRef.value?.setScopes(['workflow:delete']);
 			const { getByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: true,
-					scopes: ['workflow:delete'],
 				},
 			});
 
@@ -665,11 +665,11 @@ describe('WorkflowDetails', () => {
 			workflowsListStore.getWorkflowById.mockReturnValue(teamWorkflow as IWorkflowDb);
 			workflowsListStore.deleteWorkflow.mockResolvedValue(undefined);
 
+			workflowDocumentStoreRef.value?.setScopes(['workflow:delete']);
 			const { getByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: true,
-					scopes: ['workflow:delete'],
 				},
 			});
 
@@ -697,11 +697,11 @@ describe('WorkflowDetails', () => {
 			workflowsListStore.getWorkflowById.mockReturnValue(personalWorkflow as IWorkflowDb);
 			workflowsListStore.deleteWorkflow.mockResolvedValue(undefined);
 
+			workflowDocumentStoreRef.value?.setScopes(['workflow:delete']);
 			const { getByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: true,
-					scopes: ['workflow:delete'],
 				},
 			});
 
@@ -719,10 +719,10 @@ describe('WorkflowDetails', () => {
 
 			workflowsListStore.workflowsById = { [workflow.id]: workflow };
 
+			workflowDocumentStoreRef.value?.setScopes(['workflow:move']);
 			const { getByTestId } = renderComponent({
 				props: {
 					...defaultProps,
-					scopes: ['workflow:move'],
 				},
 			});
 
@@ -738,11 +738,11 @@ describe('WorkflowDetails', () => {
 
 	describe('Archived badge', () => {
 		it('should show badge on archived workflow', async () => {
+			workflowDocumentStoreRef.value?.setScopes(['workflow:delete']);
 			const { getByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: true,
-					scopes: ['workflow:delete'],
 				},
 			});
 
@@ -750,11 +750,11 @@ describe('WorkflowDetails', () => {
 		});
 
 		it('should not show badge on non archived workflow', async () => {
+			workflowDocumentStoreRef.value?.setScopes(['workflow:delete']);
 			const { queryByTestId } = renderComponent({
 				props: {
 					...defaultProps,
 					isArchived: false,
-					scopes: ['workflow:delete'],
 				},
 			});
 
