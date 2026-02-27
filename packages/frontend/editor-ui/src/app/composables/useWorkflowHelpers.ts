@@ -603,7 +603,7 @@ export function useWorkflowHelpers() {
 			pinData: workflowDocumentStore?.getPinDataSnapshot() ?? {},
 			connections: workflowConnections,
 			active: useWorkflowDocumentStore(createWorkflowDocumentId(workflowsStore.workflowId)).active,
-			settings: workflowsStore.workflow.settings,
+			settings: workflowDocumentStore?.settings ?? {},
 			tags,
 			versionId: workflowsStore.workflow.versionId,
 			meta: workflowsStore.workflow.meta,
@@ -979,7 +979,6 @@ export function useWorkflowHelpers() {
 			newName: workflowData.name,
 			setStateDirty: uiStore.stateIsDirty,
 		});
-		ws.setWorkflowSettings(workflowData.settings ?? {});
 		workflowsStore.setWorkflowVersionData({
 			versionId: workflowData.versionId,
 			name: null,
@@ -1027,11 +1026,18 @@ export function useWorkflowHelpers() {
 		const workflowDocumentStore = useWorkflowDocumentStore(
 			createWorkflowDocumentId(workflowData.id),
 		);
+
+		// Sync document store settings → workflowObject (runtime Workflow instance)
+		workflowDocumentStore.onSettingsChange(({ payload }) => {
+			workflowsStore.workflowObject.setSettings(payload.settings);
+		});
+
 		workflowDocumentStore.setTags(tagIds);
 		workflowDocumentStore.setActiveState({
 			activeVersionId: workflowData.activeVersionId,
 			activeVersion: workflowData.activeVersion ?? null,
 		});
+		workflowDocumentStore.setSettings(workflowData.settings ?? {});
 		workflowDocumentStore.setPinData(workflowData.pinData ?? {});
 		workflowDocumentStore.setHomeProject(workflowData.homeProject ?? null);
 		if (workflowData.checksum) {

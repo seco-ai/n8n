@@ -6,6 +6,7 @@ import { useWorkflowDocumentActive } from './workflowDocument/useWorkflowDocumen
 import { useWorkflowDocumentHomeProject } from './workflowDocument/useWorkflowDocumentHomeProject';
 import { useWorkflowDocumentChecksum } from './workflowDocument/useWorkflowDocumentChecksum';
 import { useWorkflowDocumentPinData } from './workflowDocument/useWorkflowDocumentPinData';
+import { useWorkflowDocumentSettings } from './workflowDocument/useWorkflowDocumentSettings';
 import { useWorkflowDocumentTags } from './workflowDocument/useWorkflowDocumentTags';
 
 export {
@@ -53,6 +54,7 @@ export function useWorkflowDocumentStore(id: WorkflowDocumentId) {
 		const workflowDocumentChecksum = useWorkflowDocumentChecksum();
 		const workflowDocumentTags = useWorkflowDocumentTags();
 		const workflowDocumentPinData = useWorkflowDocumentPinData();
+		const workflowDocumentSettings = useWorkflowDocumentSettings();
 
 		return {
 			workflowId,
@@ -60,6 +62,7 @@ export function useWorkflowDocumentStore(id: WorkflowDocumentId) {
 			...workflowDocumentActive,
 			...workflowDocumentHomeProject,
 			...workflowDocumentChecksum,
+			...workflowDocumentSettings,
 			...workflowDocumentTags,
 			...workflowDocumentPinData,
 		};

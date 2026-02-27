@@ -16,6 +16,10 @@ import { useSourceControlStore } from '@/features/integrations/sourceControl.ee/
 import * as restApiClient from '@n8n/rest-api-client';
 import { mock } from 'vitest-mock-extended';
 import { BINARY_MODE_COMBINED } from 'n8n-workflow';
+import {
+	useWorkflowDocumentStore,
+	createWorkflowDocumentId,
+} from '@/app/stores/workflowDocument.store';
 
 const toast = {
 	showMessage: vi.fn(),
@@ -55,6 +59,7 @@ let sourceControlStore: MockedStore<typeof useSourceControlStore>;
 let pinia: ReturnType<typeof createTestingPinia>;
 
 let searchWorkflowsSpy: MockInstance<(typeof workflowsListStore)['searchWorkflows']>;
+let workflowDocumentStore: ReturnType<typeof useWorkflowDocumentStore>;
 
 const createComponent = createComponentRenderer(WorkflowSettingsVue, {
 	global: {
@@ -69,11 +74,19 @@ const createComponent = createComponentRenderer(WorkflowSettingsVue, {
 
 describe('WorkflowSettingsVue', () => {
 	beforeEach(async () => {
-		pinia = createTestingPinia();
+		pinia = createTestingPinia({ stubActions: false });
 		workflowsStore = mockedStore(useWorkflowsStore);
 		workflowsListStore = mockedStore(useWorkflowsListStore);
 		settingsStore = mockedStore(useSettingsStore);
 		sourceControlStore = mockedStore(useSourceControlStore);
+
+		// Mock specific store actions that tests assert on
+		workflowsStore.updateWorkflow = vi.fn();
+		workflowsListStore.fetchWorkflow = vi.fn();
+
+		// Create document store on the main pinia (same one the component uses).
+		// With stubActions: false, setSettings and getSettingsSnapshot work normally.
+		workflowDocumentStore = useWorkflowDocumentStore(createWorkflowDocumentId('1'));
 
 		settingsStore.settings = mock<FrontendSettings>({
 			enterprise: {},
@@ -160,9 +173,9 @@ describe('WorkflowSettingsVue', () => {
 		});
 
 		it('should initialize undefined errorWorkflow to DEFAULT', async () => {
-			workflowsStore.workflowSettings = {
+			workflowDocumentStore.setSettings({
 				executionOrder: 'v1',
-			};
+			});
 
 			const { getByTestId, getByRole } = createComponent({ pinia });
 			await nextTick();
@@ -181,10 +194,10 @@ describe('WorkflowSettingsVue', () => {
 		});
 
 		it('should send DEFAULT value for errorWorkflow to backend when set to "No Workflow"', async () => {
-			workflowsStore.workflowSettings = {
+			workflowDocumentStore.setSettings({
 				executionOrder: 'v1',
 				errorWorkflow: 'some-workflow-id',
-			};
+			});
 
 			const { getByTestId, getByRole } = createComponent({ pinia });
 			await nextTick();
@@ -205,9 +218,9 @@ describe('WorkflowSettingsVue', () => {
 		});
 
 		it('should save workflow with errorWorkflow when a specific workflow is selected', async () => {
-			workflowsStore.workflowSettings = {
+			workflowDocumentStore.setSettings({
 				executionOrder: 'v1',
-			};
+			});
 
 			const { getByTestId, getByRole } = createComponent({ pinia });
 			await nextTick();
@@ -309,7 +322,7 @@ describe('WorkflowSettingsVue', () => {
 	);
 
 	it('should save time saved per execution correctly', async () => {
-		workflowsStore.workflowSettings.timeSavedMode = 'fixed';
+		workflowDocumentStore.setSettings({ timeSavedMode: 'fixed' });
 		const { getByTestId, getByRole } = createComponent({ pinia });
 		await nextTick();
 		await waitFor(() => {
@@ -331,8 +344,7 @@ describe('WorkflowSettingsVue', () => {
 	});
 
 	it('should remove time saved per execution setting', async () => {
-		workflowsStore.workflowSettings.timeSavedMode = 'fixed';
-		workflowsStore.workflowSettings.timeSavedPerExecution = 10;
+		workflowDocumentStore.setSettings({ timeSavedMode: 'fixed', timeSavedPerExecution: 10 });
 
 		const { getByTestId, getByRole } = createComponent({ pinia });
 		await nextTick();
@@ -358,7 +370,7 @@ describe('WorkflowSettingsVue', () => {
 	});
 
 	it('should disable save time saved per execution if env is read-only', async () => {
-		workflowsStore.workflowSettings.timeSavedMode = 'fixed';
+		workflowDocumentStore.setSettings({ timeSavedMode: 'fixed' });
 		sourceControlStore.preferences.branchReadOnly = true;
 
 		const { getByTestId } = createComponent({ pinia });
@@ -375,7 +387,7 @@ describe('WorkflowSettingsVue', () => {
 	});
 
 	it('should disable save time saved per execution if user has no permission to update workflow', async () => {
-		workflowsStore.workflowSettings.timeSavedMode = 'fixed';
+		workflowDocumentStore.setSettings({ timeSavedMode: 'fixed' });
 
 		const readOnlyWorkflow = createTestWorkflow({
 			id: '1',
@@ -418,8 +430,7 @@ describe('WorkflowSettingsVue', () => {
 		});
 
 		it('should set binaryMode to separate when selecting v0', async () => {
-			workflowsStore.workflowSettings.executionOrder = 'v1';
-			workflowsStore.workflowSettings.binaryMode = BINARY_MODE_COMBINED;
+			workflowDocumentStore.setSettings({ executionOrder: 'v1', binaryMode: BINARY_MODE_COMBINED });
 
 			const { getByTestId, getByRole } = createComponent({ pinia });
 			await nextTick();
@@ -443,8 +454,7 @@ describe('WorkflowSettingsVue', () => {
 		});
 
 		it('should set binaryMode to separate when selecting v1', async () => {
-			workflowsStore.workflowSettings.executionOrder = 'v0';
-			workflowsStore.workflowSettings.binaryMode = BINARY_MODE_COMBINED;
+			workflowDocumentStore.setSettings({ executionOrder: 'v0', binaryMode: BINARY_MODE_COMBINED });
 
 			const { getByTestId, getByRole } = createComponent({ pinia });
 			await nextTick();
@@ -468,8 +478,7 @@ describe('WorkflowSettingsVue', () => {
 		});
 
 		it('should show binary mode warning toast when binary mode changes', async () => {
-			workflowsStore.workflowSettings.executionOrder = 'v1';
-			workflowsStore.workflowSettings.binaryMode = BINARY_MODE_COMBINED;
+			workflowDocumentStore.setSettings({ executionOrder: 'v1', binaryMode: BINARY_MODE_COMBINED });
 
 			const { getByTestId, getByRole } = createComponent({ pinia });
 			await nextTick();
@@ -493,8 +502,7 @@ describe('WorkflowSettingsVue', () => {
 		});
 
 		it('should not show warning when binary mode does not change', async () => {
-			workflowsStore.workflowSettings.executionOrder = 'v0';
-			workflowsStore.workflowSettings.binaryMode = 'separate';
+			workflowDocumentStore.setSettings({ executionOrder: 'v0', binaryMode: 'separate' });
 
 			const { getByTestId } = createComponent({ pinia });
 			await nextTick();
@@ -512,9 +520,9 @@ describe('WorkflowSettingsVue', () => {
 		});
 
 		it('should default to v1 execution order when not set', async () => {
-			workflowsStore.workflowSettings = {
+			workflowDocumentStore.setSettings({
 				executionOrder: 'v1',
-			};
+			});
 
 			const { getByTestId } = createComponent({ pinia });
 			await nextTick();
@@ -633,7 +641,7 @@ describe('WorkflowSettingsVue', () => {
 		});
 
 		it('should show "Edit" button when a resolver is selected', async () => {
-			workflowsStore.workflowSettings.credentialResolverId = 'resolver-1';
+			workflowDocumentStore.setSettings({ credentialResolverId: 'resolver-1' });
 
 			const { getByTestId } = createComponent({ pinia });
 			await nextTick();
