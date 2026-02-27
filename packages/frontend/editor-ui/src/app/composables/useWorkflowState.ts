@@ -167,19 +167,12 @@ export function useWorkflowState() {
 		return workflowData;
 	}
 
-	function makeNewWorkflowShareable() {
-		// scopes and homeProject for new workflows are now set on the
-		// workflowDocumentStore in initializeWorkspaceForNewWorkflow
-	}
-
 	async function getNewWorkflowDataAndMakeShareable(
 		name?: string,
 		projectId?: string,
 		parentFolderId?: string,
 	): Promise<INewWorkflowData> {
-		const workflowData = await getNewWorkflowData(name, projectId, parentFolderId);
-		makeNewWorkflowShareable();
-		return workflowData;
+		return await getNewWorkflowData(name, projectId, parentFolderId);
 	}
 
 	function setWorkflowMetadata(metadata: WorkflowMetadata | undefined): void {
